@@ -6,6 +6,7 @@ import App from './App'
 import Participantes from './pages/Participantes'
 import Cursos from './pages/Cursos'
 import Importar from './pages/Importar'
+import Inicio from './pages/Inicio'
 import Certificados from './pages/Certificados'
 import { api } from './api'
 
@@ -26,17 +27,93 @@ const PARTICIPANTE = {
   total_cursos: 2, total_aprobados: 2, total_faltas: 0,
 }
 
-describe('Navegación', () => {
-  test('muestra el panel y permite cambiar de sección', async () => {
+describe('Navegación e Inicio', () => {
+  test('muestra las tarjetas de resumen y los cursos', async () => {
     vi.spyOn(api, 'dashboard').mockResolvedValue(DASHBOARD)
+    vi.spyOn(api, 'participantes').mockResolvedValue({ results: [] })
     vi.spyOn(api, 'cursos').mockResolvedValue({ results: [] })
     render(<App />)
 
-    expect(await screen.findByText('Panel general')).toBeInTheDocument()
+    expect(await screen.findByText('Sistema de Gestión de Participantes')).toBeInTheDocument()
+    // Tarjetas: participantes, cursos activos, aprobados y certificados.
+    expect(await screen.findByText('4')).toBeInTheDocument()
+    expect(screen.getByText('registrados')).toBeInTheDocument()
+    expect(screen.getByText('guardados')).toBeInTheDocument()
+    // La tarjeta "Cursos" muestra los ACTIVOS, no el total.
+    expect(screen.getByText('activos')).toBeInTheDocument()
     expect(await screen.findByText('Seguridad Industrial')).toBeInTheDocument()
+    expect(screen.getByText('3 participantes')).toBeInTheDocument()
+  })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cursos' }))
+  test('permite cambiar de sección desde el menú lateral', async () => {
+    vi.spyOn(api, 'dashboard').mockResolvedValue(DASHBOARD)
+    vi.spyOn(api, 'participantes').mockResolvedValue({ results: [] })
+    vi.spyOn(api, 'cursos').mockResolvedValue({ results: [] })
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Cursos/ }))
     expect(await screen.findByText('Participantes organizados por curso')).toBeInTheDocument()
+  })
+
+  test('al pulsar un curso en Inicio se abre esa sección con el curso elegido', async () => {
+    vi.spyOn(api, 'dashboard').mockResolvedValue(DASHBOARD)
+    vi.spyOn(api, 'participantes').mockResolvedValue({ results: [] })
+    vi.spyOn(api, 'cursos').mockResolvedValue({
+      results: [
+        { id: 7, nombre: 'Otro Curso', activo: true, total_participantes: 1, porcentaje_aprobacion: 0 },
+        { id: 1, nombre: 'Seguridad Industrial', activo: true, total_participantes: 3, porcentaje_aprobacion: 66.7 },
+      ],
+    })
+    vi.spyOn(api, 'participantesDeCurso').mockResolvedValue([])
+    render(<App />)
+
+    fireEvent.click(await screen.findByText('Seguridad Industrial'))
+    // Se selecciona el curso pulsado, no el primero de la lista.
+    await waitFor(() => expect(api.participantesDeCurso).toHaveBeenCalledWith(1))
+  })
+})
+
+describe('Inicio · carga de Excel y ficha', () => {
+  test('importa el archivo y refresca las métricas', async () => {
+    vi.spyOn(api, 'dashboard').mockResolvedValue(DASHBOARD)
+    vi.spyOn(api, 'participantes').mockResolvedValue({ results: [] })
+    const spy = vi.spyOn(api, 'importarExcel').mockResolvedValue({
+      filas_procesadas: 7, participantes_nuevos: 4, cursos_nuevos: 3,
+      inscripciones: 7, total_errores: 0, errores: [], columnas_detectadas: {},
+    })
+    const { container } = render(<Inicio onIrACursos={() => {}} />)
+
+    fireEvent.change(container.querySelector('input[type=file]'), {
+      target: { files: [new File(['x'], 'participantes.xlsx')] },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Cargar Excel/ }))
+
+    await waitFor(() => expect(spy).toHaveBeenCalled())
+    expect(await screen.findByText(/7 filas procesadas/)).toBeInTheDocument()
+  })
+
+  test('muestra la ficha del participante con cursos, estados y certificados', async () => {
+    vi.spyOn(api, 'dashboard').mockResolvedValue(DASHBOARD)
+    vi.spyOn(api, 'participantes').mockResolvedValue({ results: [PARTICIPANTE] })
+    vi.spyOn(api, 'reporte').mockResolvedValue({
+      ...PARTICIPANTE,
+      resumen: { total_cursos: 2, aprobados: 1, reprobados: 0, faltas: 1, certificados: 1 },
+      cursos: [
+        { id: 1, curso_nombre: 'Curso X', estado: 'Aprobado', certificados: [{ id: 1, archivo_url: '/media/x.pdf' }] },
+        { id: 2, curso_nombre: 'Curso Y', estado: 'Faltó', certificados: [] },
+      ],
+    })
+    render(<Inicio onIrACursos={() => {}} />)
+
+    expect(await screen.findByText('María José Pérez Rojas')).toBeInTheDocument()
+    expect(screen.getByText('DNI: V-18456321')).toBeInTheDocument()
+    expect(screen.getByText('Curso X: Aprobado')).toBeInTheDocument()
+    expect(screen.getByText('Curso Y: Faltó')).toBeInTheDocument()
+    // Las faltas se cuentan por curso.
+    expect(screen.getByText('Curso X: 0')).toBeInTheDocument()
+    expect(screen.getByText('Curso Y: 1')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Curso X - María José Pérez Rojas\.pdf/ }))
+      .toHaveAttribute('href', '/media/x.pdf')
   })
 })
 

@@ -39,6 +39,7 @@ export const api = {
   participantesDeCurso: (id) => request(`/cursos/${id}/participantes/`),
   actualizarCurso: (id, datos) => request(`/cursos/${id}/`, json('PATCH', datos)),
 
+  inscripciones: (query = '') => request(`/inscripciones/?${query}`),
   actualizarInscripcion: (id, datos) => request(`/inscripciones/${id}/`, json('PATCH', datos)),
 
   certificados: (busqueda = '') =>

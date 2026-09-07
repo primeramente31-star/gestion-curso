@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { Alerta, PageHeader } from '../components'
+import { IconBuscar } from '../icons'
 
 export default function Certificados() {
   const [lista, setLista] = useState([])
@@ -47,8 +48,11 @@ export default function Certificados() {
         subtitulo="El sistema lee el curso y los nombres/apellidos del archivo y lo vincula al participante" />
 
       <div className="toolbar">
-        <input className="search" placeholder="Buscar por participante o curso…"
-          value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        <div className="search-wrap search">
+          <IconBuscar width={17} height={17} />
+          <input placeholder="Buscar por participante o curso…"
+            value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        </div>
         <input ref={input} type="file" multiple accept=".pdf,.png,.jpg,.jpeg"
           style={{ display: 'none' }}
           onChange={(e) => subir(Array.from(e.target.files))} />

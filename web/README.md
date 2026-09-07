@@ -21,8 +21,11 @@ web/
     └── src/
         ├── api.js          Cliente REST
         ├── components.jsx  Componentes reutilizables
-        ├── pages/          Panel, Participantes, Cursos, Importar, Certificados
-        └── App.test.jsx    6 pruebas de interfaz
+        ├── icons.jsx       Iconos SVG en línea (sin dependencias)
+        ├── index.css       Tema visual (variables CSS)
+        ├── pages/          Inicio, Participantes, Cursos, Importar,
+        │                   Certificados, Reportes, Configuración
+        └── *.test.jsx      11 pruebas de interfaz
 ```
 
 ### Modelo de datos
@@ -99,12 +102,25 @@ Si no logra identificarlo responde `422` explicando el motivo, sin guardar nada.
 
 ```bash
 cd web/backend  && python manage.py test   # 24 pruebas
-cd web/frontend && npm test                # 6 pruebas
+cd web/frontend && npm test                # 11 pruebas
 ```
 
 Cubren: normalización de estados y columnas, importación y reimportación,
 detección de certificados, búsquedas, filtro de cursos activos, reporte del
-participante y los flujos de la interfaz.
+participante, los flujos de la interfaz y que la pantalla de Inicio reproduzca
+la estructura del diseño de referencia.
+
+## Interfaz
+
+La pantalla de **Inicio** sigue el diseño acordado: menú lateral azul marino con
+iconos, cuatro tarjetas de resumen en color (participantes, cursos activos,
+aprobados y certificados), carga de Excel con zona de arrastre, buscador de
+cursos y ficha del participante con cursos realizados, faltas, estado y
+certificados enlazados.
+
+Todo el estilo está centralizado en variables CSS al inicio de
+`frontend/src/index.css`, por lo que colores y tipografía se ajustan sin tocar
+la lógica.
 
 ## Despliegue
 

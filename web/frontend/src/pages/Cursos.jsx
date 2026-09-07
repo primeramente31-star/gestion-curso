@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Estado, PageHeader, Vacio } from '../components'
+import { IconBuscar } from '../icons'
 
 const ESTADOS = ['Inscrito', 'Aprobado', 'Reprobado', 'Faltó']
 
-export default function Cursos() {
+export default function Cursos({ cursoInicial }) {
   const [cursos, setCursos] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [soloActivos, setSoloActivos] = useState(false)
@@ -15,7 +16,11 @@ export default function Cursos() {
     const data = await api.cursos({ busqueda, soloActivos })
     const lista = data.results || data
     setCursos(lista)
-    if (lista.length && !lista.find((c) => c.id === seleccion?.id)) setSeleccion(lista[0])
+    if (lista.length && !lista.find((c) => c.id === seleccion?.id)) {
+      // Si se llegó desde el listado de Inicio, se abre ese curso.
+      const inicial = cursoInicial && lista.find((c) => c.id === cursoInicial.id)
+      setSeleccion(inicial || lista[0])
+    }
     if (!lista.length) { setSeleccion(null); setInscripciones([]) }
   }
 
@@ -44,14 +49,17 @@ export default function Cursos() {
     <>
       <PageHeader titulo="Cursos" subtitulo="Participantes organizados por curso" />
       <div className="toolbar">
-        <input className="search" placeholder="Buscar curso por nombre, código o instructor…"
-          value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        <div className="search-wrap search">
+          <IconBuscar width={17} height={17} />
+          <input placeholder="Buscar curso por nombre, código o instructor…"
+            value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        </div>
         <label className="checkbox">
           <input type="checkbox" checked={soloActivos}
             onChange={(e) => setSoloActivos(e.target.checked)} />
           Solo cursos activos
         </label>
-        <select value={seleccion?.id || ''}
+        <select style={{ width: 'auto' }} value={seleccion?.id || ''}
           onChange={(e) => setSeleccion(cursos.find((c) => c.id === Number(e.target.value)))}>
           {cursos.map((c) => (
             <option key={c.id} value={c.id}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Alerta, Estado, Modal, PageHeader, Stat, Vacio } from '../components'
+import { IconBuscar } from '../icons'
 
 function ReporteParticipante({ id, onClose }) {
   const [rep, setRep] = useState(null)
@@ -122,8 +123,11 @@ export default function Participantes() {
     <>
       <PageHeader titulo="Participantes" subtitulo="Registro de personas y su historial formativo" />
       <div className="toolbar">
-        <input className="search" placeholder="Buscar por nombre, apellido o DNI…"
-          value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        <div className="search-wrap search">
+          <IconBuscar width={17} height={17} />
+          <input placeholder="Buscar por nombre, apellido o DNI…"
+            value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        </div>
         <button onClick={() => setCreando(true)}>Nuevo participante</button>
       </div>
 

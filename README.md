@@ -1,7 +1,12 @@
 # Sistema de Gestión de Cursos
 
-Aplicación **de escritorio** (Python + PySide6) para administrar las personas que han
-participado en los cursos de la organización.
+Sistema para administrar las personas que han participado en los cursos de la
+organización, disponible en **dos versiones** que comparten la misma lógica:
+
+| Versión | Tecnología | Ubicación |
+|---------|-----------|-----------|
+| **Escritorio** | Python + PySide6 | raíz del repositorio (`main.py`) |
+| **Web** | Django REST + React | [`web/`](web/README.md) |
 
 ## Funcionalidades
 

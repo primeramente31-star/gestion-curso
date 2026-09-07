@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      DEBUG: "0"
+      SECRET_KEY: ${SECRET_KEY:-cambia-esta-clave}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+      DATABASE_URL: postgres://curso:curso@db:5432/curso
+    depends_on: [db]
+    ports: ["8000:8000"]
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: curso
+      POSTGRES_PASSWORD: curso
+      POSTGRES_DB: curso
+    volumes: [pgdata:/var/lib/postgresql/data]
+volumes:
+  pgdata:

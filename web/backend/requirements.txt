@@ -1,0 +1,10 @@
+Django==5.2.17
+dj-database-url==3.1.2
+django-cors-headers==4.9.0
+django-filter==26.1
+djangorestframework==3.18.1
+gunicorn==26.2.0
+openpyxl==3.1.5
+pandas==3.0.5
+pypdf==6.18.0
+whitenoise==6.12.0
